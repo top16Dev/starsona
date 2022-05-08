@@ -1,0 +1,11 @@
+node_modules/
+dist/
+
+*.log
+.vscode
+.chrome
+.env
+env.js
+.DS_Store
+.idea/
+yarn.lock

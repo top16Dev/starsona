@@ -1,0 +1,68 @@
+{
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "browsers": [
+              "last 2 versions"
+            ]
+          }
+        }
+      ],
+      "react"
+    ],
+    "plugins": [
+      "transform-decorators-legacy",
+      "transform-object-rest-spread",
+      "transform-class-properties",
+      "react-hot-loader/babel",
+      "syntax-dynamic-import",
+      [
+        "import-inspector",
+        {
+          "serverSideRequirePath": true
+        }
+      ],
+      ["transform-imports", {
+          "lodash": {
+              "transform": "lodash/${member}",
+              "preventFullImport": true
+          },
+          "@material-ui/core": {
+            "transform": "@material-ui/core/${member}",
+            "preventFullImport": true
+        },
+          "@fortawesome/free-solid-svg-icons": {
+            "transform": "@fortawesome/free-solid-svg-icons/${member}",
+            "skipDefaultConversion": true,
+            "preventFullImport": true
+          },
+          "@fortawesome/free-brands-svg-icons": {
+            "transform": "@fortawesome/free-brands-svg-icons/${member}",
+            "skipDefaultConversion": true,
+            "preventFullImport": true
+          },
+          "@fortawesome/free-regular-svg-icons": {
+            "transform": "@fortawesome/free-regular-svg-icons/${member}",
+            "skipDefaultConversion": true,
+            "preventFullImport": true
+          },
+          "@fortawesome/pro-light-svg-icons": {
+            "transform": "@fortawesome/pro-light-svg-icons/${member}",
+            "skipDefaultConversion": true,
+            "preventFullImport": true
+          },
+          "@fortawesome/pro-regular-svg-icons": {
+            "transform": "@fortawesome/pro-regular-svg-icons/${member}",
+            "skipDefaultConversion": true,
+            "preventFullImport": true
+          },
+          "@fortawesome/pro-solid-svg-icons": {
+            "transform": "@fortawesome/pro-solid-svg-icons/${member}",
+            "skipDefaultConversion": true,
+            "preventFullImport": true
+          },
+      }],
+    ]
+  }

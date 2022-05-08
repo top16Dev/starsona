@@ -1,0 +1,42 @@
+version: 0.2
+
+env:
+  variables:
+    GIT_SSH_COMMAND: "ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+
+phases:
+  install:
+    commands:
+      - apt-get update && apt-get install -y openssh-client jq
+      - mkdir -p ~/.ssh/ && chmod 700 ~/.ssh/
+      - aws ssm get-parameter --name /codebuild/bitbucket/key.pem | jq -r .Parameter.Value > ~/.ssh/id_rsa
+      - chmod 600 ~/.ssh/id_rsa
+  build:
+    commands:
+      - chmod +x aws/scripts/release.sh
+      - echo Reading parameters from SSM...
+      - aws ssm get-parameter --name ${PARAMETERS} | jq -r .Parameter.Value > parameters.json
+      - cat parameters.json
+      - export VERSION=`cat parameters.json | jq -r .Parameters.Version`
+      - export GIT_BRANCH=`cat parameters.json | jq -r .Parameters.GitBranch`
+      - export BASE_IMAGE_TAG=`cat parameters.json | jq -r .Parameters.BaseImageTag`
+      - export CODEBUILD_RESOLVED_SOURCE_VERSION=`cat .bitbucket/BITBUCKET_COMMIT`
+      - export BITBUCKET_GIT_SSH_ORIGIN=`cat .bitbucket/BITBUCKET_GIT_SSH_ORIGIN`
+      - aws/scripts/release.sh "${BITBUCKET_GIT_SSH_ORIGIN}"
+      - export HOTFIX_VERSION=`cat .hotfix-version`
+      - export HOTFIX_BRANCH=`cat .hotfix-branch`
+      - echo New hotfix branch ${BRANCH} version ${HOTFIX}
+      - export MASTER_VERSION=`cat .master-version`
+      - echo Codepipeline version ${CODEPIPELINE}
+      - echo Writing artifacts...
+      - cat parameters.json | jq ".Parameters.Version = \"${MASTER_VERSION}\"" > codepipeline.json
+      - aws ssm get-parameter --name /codepipeline/web/hotfix.json | jq -r .Parameter.Value | jq ".Parameters.Version = \"${HOTFIX_VERSION}\" | .Parameters.GitBranch = \"${HOTFIX_BRANCH}\" | .Parameters.BaseImageTag = \"${BASE_IMAGE_TAG}\"" > hotfix.json
+      - cat codepipeline.json hotfix.json
+      - echo Updating SSM...
+      - aws ssm put-parameter --name /codepipeline/web/codepipeline.json --type String --overwrite --value file://./codepipeline.json
+      - aws ssm put-parameter --name /codepipeline/web/hotfix.json --type String --overwrite --value file://./hotfix.json
+artifacts:
+  files:
+  - hotfix.json
+  - codepipeline.json
+  discard-paths: yes
